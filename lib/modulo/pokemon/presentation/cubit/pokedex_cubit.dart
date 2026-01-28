@@ -28,9 +28,56 @@ class PokedexCubit extends Cubit<PokedexState> {
       emit(PokedexState.loaded(
         pokemonList: response.results,
         hasMore: response.next != null,
+        currentOffset: AppConstants.defaultPageLimit,
       ));
     } catch (e) {
       emit(PokedexState.error(message: e.toString()));
+    }
+  }
+
+  /// Carga más Pokémon para scroll infinito
+  Future<void> loadMorePokemon() async {
+    final currentState = state;
+    
+    // Solo cargar más si hay más disponible y no está cargando
+    if (currentState is! _Loaded || !currentState.hasMore) {
+      return;
+    }
+
+    // Evitar múltiples llamadas simultáneas
+    if (currentState is _LoadingMore) {
+      return;
+    }
+
+    emit(PokedexState.loadingMore(
+      pokemonList: currentState.pokemonList,
+      hasMore: currentState.hasMore,
+      currentOffset: currentState.currentOffset,
+    ));
+
+    try {
+      final response = await _repository.getPokemonList(
+        limit: AppConstants.defaultPageLimit,
+        offset: currentState.currentOffset,
+      );
+
+      final updatedList = [
+        ...currentState.pokemonList,
+        ...response.results,
+      ];
+
+      emit(PokedexState.loaded(
+        pokemonList: updatedList,
+        hasMore: response.next != null,
+        currentOffset: currentState.currentOffset + AppConstants.defaultPageLimit,
+      ));
+    } catch (e) {
+      emit(PokedexState.errorLoadingMore(
+        pokemonList: currentState.pokemonList,
+        hasMore: currentState.hasMore,
+        currentOffset: currentState.currentOffset,
+        message: e.toString(),
+      ));
     }
   }
 }
