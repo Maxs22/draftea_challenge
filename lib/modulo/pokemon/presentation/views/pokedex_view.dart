@@ -8,6 +8,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../data/models/pokemon_model.dart';
 import '../../data/repositories/pokemon_repository_impl.dart';
 import '../widgets/cards/pokemon_card_widget.dart';
+import '../modules/pokemon_detail/views/pokemon_detail_view.dart';
 
 /// Vista principal del listado de Pokémon en grid
 class PokedexView extends StatelessWidget {
@@ -118,7 +119,14 @@ class PokedexView extends StatelessWidget {
         return PokemonCardWidget(
           pokemon: pokemon,
           onTap: () {
-            // TODO: Navegar a pantalla de detalle
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PokemonDetailView(
+                  pokemonId: pokemon.id.toString(),
+                ),
+              ),
+            );
           },
         );
       },

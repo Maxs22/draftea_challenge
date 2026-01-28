@@ -8,12 +8,22 @@ class PokemonModel extends Equatable {
     required this.name,
     required this.imageUrl,
     this.thumbnailUrl,
+    this.height,
+    this.weight,
+    this.types,
+    this.abilities,
+    this.baseExperience,
   });
 
   final int id;
   final String name;
   final String imageUrl;
   final String? thumbnailUrl;
+  final int? height; // en decímetros
+  final int? weight; // en hectogramos
+  final List<String>? types; // tipos del Pokémon
+  final List<String>? abilities; // habilidades del Pokémon
+  final int? baseExperience;
 
   /// Factory constructor para crear desde JSON del endpoint de listado
   factory PokemonModel.fromListJson(Map<String, dynamic> json) {
@@ -33,16 +43,47 @@ class PokemonModel extends Equatable {
   factory PokemonModel.fromDetailJson(Map<String, dynamic> json) {
     final id = json['id'] as int;
     final name = json['name'] as String;
+    final height = json['height'] as int?;
+    final weight = json['weight'] as int?;
+    final baseExperience = json['base_experience'] as int?;
+    
     final sprites = json['sprites'] as Map<String, dynamic>?;
     final other = sprites?['other'] as Map<String, dynamic>?;
     final officialArtwork = other?['official-artwork'] as Map<String, dynamic>?;
     final frontDefault = officialArtwork?['front_default'] as String?;
+
+    // Extraer tipos
+    final typesList = json['types'] as List<dynamic>?;
+    final types = typesList
+        ?.map((type) {
+          final typeData = type as Map<String, dynamic>;
+          final typeInfo = typeData['type'] as Map<String, dynamic>;
+          return typeInfo['name'] as String;
+        })
+        .cast<String>()
+        .toList();
+
+    // Extraer habilidades
+    final abilitiesList = json['abilities'] as List<dynamic>?;
+    final abilities = abilitiesList
+        ?.map((ability) {
+          final abilityData = ability as Map<String, dynamic>;
+          final abilityInfo = abilityData['ability'] as Map<String, dynamic>;
+          return abilityInfo['name'] as String;
+        })
+        .cast<String>()
+        .toList();
 
     return PokemonModel(
       id: id,
       name: name,
       imageUrl: frontDefault ?? '${AppConstants.pokemonImageBaseUrl}/$id.png',
       thumbnailUrl: '${AppConstants.pokemonThumbnailBaseUrl}/$id.png',
+      height: height,
+      weight: weight,
+      types: types,
+      abilities: abilities,
+      baseExperience: baseExperience,
     );
   }
 
@@ -68,14 +109,40 @@ class PokemonModel extends Equatable {
     String? name,
     String? imageUrl,
     String? thumbnailUrl,
+    int? height,
+    int? weight,
+    List<String>? types,
+    List<String>? abilities,
+    int? baseExperience,
   }) =>
       PokemonModel(
         id: id ?? this.id,
         name: name ?? this.name,
         imageUrl: imageUrl ?? this.imageUrl,
         thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+        height: height ?? this.height,
+        weight: weight ?? this.weight,
+        types: types ?? this.types,
+        abilities: abilities ?? this.abilities,
+        baseExperience: baseExperience ?? this.baseExperience,
       );
 
+  /// Obtiene la altura en metros
+  double get heightInMeters => (height ?? 0) / 10.0;
+
+  /// Obtiene el peso en kilogramos
+  double get weightInKg => (weight ?? 0) / 10.0;
+
   @override
-  List<Object?> get props => [id, name, imageUrl, thumbnailUrl];
+  List<Object?> get props => [
+        id,
+        name,
+        imageUrl,
+        thumbnailUrl,
+        height,
+        weight,
+        types,
+        abilities,
+        baseExperience,
+      ];
 }
