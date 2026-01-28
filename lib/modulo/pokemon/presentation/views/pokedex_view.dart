@@ -20,33 +20,11 @@ class PokedexView extends StatefulWidget {
 
 class _PokedexViewState extends State<PokedexView> {
   final ScrollController _scrollController = ScrollController();
-  PokedexCubit? _cubit;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_onScroll);
-  }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
-  }
-
-  void _onScroll() {
-    if (!mounted || _cubit == null) return;
-    if (_isBottom) {
-      _cubit!.loadMorePokemon();
-    }
-  }
-
-  bool get _isBottom {
-    if (!_scrollController.hasClients) return false;
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.offset;
-    return currentScroll >= (maxScroll * 0.9);
   }
 
   @override
@@ -54,9 +32,7 @@ class _PokedexViewState extends State<PokedexView> {
     return BlocProvider(
       create: (context) {
         final repository = PokemonRepositoryImpl();
-        final cubit = PokedexCubit(repository: repository)..loadPokemonList();
-        _cubit = cubit;
-        return cubit;
+        return PokedexCubit(repository: repository)..loadPokemonList();
       },
       child: Scaffold(
         appBar: AppBar(
@@ -67,7 +43,7 @@ class _PokedexViewState extends State<PokedexView> {
           elevation: 0,
         ),
         body: BlocBuilder<PokedexCubit, PokedexState>(
-          builder: (context, state) {
+            builder: (context, state) {
             return state.when(
               initial: () => const SizedBox.shrink(),
               loading: () => const Center(
@@ -96,7 +72,7 @@ class _PokedexViewState extends State<PokedexView> {
                   );
                 }
 
-                return _buildGrid(context, pokemonList, hasMore);
+                return _buildGrid(context, pokemonList, hasMore, isLoadingMore: false);
               },
               loadingMore: (pokemonList, hasMore, currentOffset) {
                 return _buildGrid(context, pokemonList, hasMore, isLoadingMore: true);
@@ -185,17 +161,36 @@ class _PokedexViewState extends State<PokedexView> {
         ? WebConfig.getGridColumnCount(context)
         : MobileConfig.getGridColumnCount(context);
 
-    return GridView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.all(AppConstants.defaultPadding),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        childAspectRatio: 0.75,
-        crossAxisSpacing: AppConstants.defaultPadding,
-        mainAxisSpacing: AppConstants.defaultPadding,
-      ),
-      itemCount: pokemonList.length + (isLoadingMore ? 1 : 0),
-      itemBuilder: (context, index) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification scrollInfo) {
+        if (scrollInfo is ScrollUpdateNotification) {
+          final metrics = scrollInfo.metrics;
+          
+          // Verificar que tenemos un maxScrollExtent válido
+          if (metrics.maxScrollExtent > 0 && 
+              metrics.pixels >= metrics.maxScrollExtent * 0.8) {
+            final cubit = context.read<PokedexCubit>();
+            final currentState = cubit.state;
+            
+            // Solo cargar más si hay más disponible y no está cargando
+            if (currentState.hasMore && !currentState.isLoadingMore) {
+              cubit.loadMorePokemon();
+            }
+          }
+        }
+        return false;
+      },
+      child: GridView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(AppConstants.defaultPadding),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          childAspectRatio: 0.75,
+          crossAxisSpacing: AppConstants.defaultPadding,
+          mainAxisSpacing: AppConstants.defaultPadding,
+        ),
+        itemCount: pokemonList.length + (isLoadingMore ? 1 : 0),
+        itemBuilder: (context, index) {
         // Mostrar indicador de carga al final si está cargando más
         if (index == pokemonList.length && isLoadingMore) {
           return const Center(
@@ -225,7 +220,8 @@ class _PokedexViewState extends State<PokedexView> {
             );
           },
         );
-      },
+        },
+      ),
     );
   }
 }

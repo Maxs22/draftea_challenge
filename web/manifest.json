@@ -3,7 +3,7 @@
     "short_name": "Pokédex",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#DC0A2D",
+    "background_color": "#ffffff",
     "theme_color": "#DC0A2D",
     "description": "Explora el mundo de los Pokémon",
     "orientation": "any",
