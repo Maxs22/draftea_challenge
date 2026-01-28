@@ -48,7 +48,7 @@ class WebConfig {
   /// Configuración de scrollbar para web
   static ScrollbarThemeData getScrollbarTheme() {
     return const ScrollbarThemeData(
-      thickness: MaterialStatePropertyAll(8.0),
+      thickness: WidgetStatePropertyAll(8.0),
       radius: Radius.circular(4.0),
       crossAxisMargin: 2.0,
       mainAxisMargin: 2.0,
