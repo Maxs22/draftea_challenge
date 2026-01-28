@@ -5,6 +5,7 @@ import '../../../../core/config/web_config.dart';
 import '../../../../core/config/mobile_config.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/widgets/draftea_logo.dart';
 import '../../data/models/pokemon_model.dart';
 import '../../data/repositories/pokemon_repository_impl.dart';
 import '../widgets/cards/pokemon_card_widget.dart';
@@ -35,12 +36,20 @@ class _PokedexViewState extends State<PokedexView> {
         return PokedexCubit(repository: repository)..loadPokemonList();
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text(AppConstants.appName),
-          backgroundColor: AppColors.primaryRed,
-          foregroundColor: AppColors.textLight,
-          centerTitle: true,
-          elevation: 0,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(kToolbarHeight),
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: AppColors.headerGradient,
+            ),
+            child: AppBar(
+              title: const DrafteaLogo(height: 20),
+              backgroundColor: Colors.transparent,
+              foregroundColor: AppColors.textLight,
+              centerTitle: false,
+              elevation: 0,
+            ),
+          ),
         ),
         body: BlocBuilder<PokedexCubit, PokedexState>(
             builder: (context, state) {

@@ -24,10 +24,18 @@ class PokemonDetailView extends StatelessWidget {
           ..loadPokemonDetail(pokemonId);
       },
       child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: AppColors.primaryRed,
-          foregroundColor: AppColors.textLight,
-          elevation: 0,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(kToolbarHeight),
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: AppColors.headerGradient,
+            ),
+            child: AppBar(
+              backgroundColor: Colors.transparent,
+              foregroundColor: AppColors.textLight,
+              elevation: 0,
+            ),
+          ),
         ),
         body: BlocBuilder<PokemonDetailCubit, PokemonDetailState>(
           builder: (context, state) {
@@ -82,7 +90,7 @@ class PokemonDetailView extends StatelessWidget {
           // Imagen del Pokémon
           Container(
             height: 300,
-            color: AppColors.backgroundLight,
+            color: AppColors.backgroundDark,
             child: Center(
               child: Image.network(
                 pokemon.imageUrl,

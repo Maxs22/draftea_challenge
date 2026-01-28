@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
-/// Constantes de colores de la aplicación Pokédex
-/// Basado en la paleta de colores temática de Pokémon
+/// Constantes de colores de la aplicación
+/// Estilo DRAFTEA - Tema oscuro con acentos púrpura y gradientes verde-amarillo
 class AppColors {
   AppColors._();
 
-  // Colores primarios (tema Pokédex)
-  static const Color primaryRed = Color(0xFFDC0A2D); // Rojo principal de Pokédex
+  // Colores primarios (tema DRAFTEA)
+  static const Color primaryPurple = Color(0xFF6B46C1); // Púrpura oscuro del header
+  static const Color primaryRed = Color(0xFFDC0A2D); // Rojo principal de Pokédex (mantener para compatibilidad)
   static const Color primaryBlue = Color(0xFF356ABC); // Azul de Pokémon
   static const Color primaryYellow = Color(0xFFFFCB05); // Amarillo de Pokémon
 
@@ -15,15 +16,16 @@ class AppColors {
   static const Color secondaryBlue = Color(0xFF3B82F6);
   static const Color secondaryYellow = Color(0xFFFCD34D);
 
-  // Colores de fondo
-  static const Color backgroundLight = Color(0xFFF5F5F5);
-  static const Color backgroundDark = Color(0xFF1A1A1A);
-  static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color surfaceDark = Color(0xFF2D2D2D);
+  // Colores de fondo (estilo DRAFTEA - oscuro)
+  static const Color backgroundLight = Color(0xFF000000); // Negro profundo
+  static const Color backgroundDark = Color(0xFF000000); // Negro profundo
+  static const Color surfaceLight = Color(0xFF1A1A1A); // Gris muy oscuro para cards
+  static const Color surfaceDark = Color(0xFF1A1A1A); // Gris muy oscuro para cards
+  static const Color headerBackground = Color(0xFF6B46C1); // Púrpura oscuro del header
 
-  // Colores de texto
-  static const Color textPrimary = Color(0xFF1F2937);
-  static const Color textSecondary = Color(0xFF6B7280);
+  // Colores de texto (estilo DRAFTEA)
+  static const Color textPrimary = Color(0xFFFFFFFF); // Blanco para texto principal
+  static const Color textSecondary = Color(0xFF9CA3AF); // Gris claro para texto secundario
   static const Color textLight = Color(0xFFFFFFFF);
   static const Color textDark = Color(0xFF111827);
 
@@ -32,6 +34,7 @@ class AppColors {
   static const Color error = Color(0xFFEF4444);
   static const Color warning = Color(0xFFF59E0B);
   static const Color info = Color(0xFF3B82F6);
+  static const Color liveRed = Color(0xFFEF4444); // Rojo para indicadores LIVE
 
   // Colores de tipos de Pokémon (para uso futuro)
   static const Color typeNormal = Color(0xFFA8A878);
@@ -53,13 +56,35 @@ class AppColors {
   static const Color typeSteel = Color(0xFFB8B8D0);
   static const Color typeFairy = Color(0xFFEE99AC);
 
-  // Colores de gradientes
+  // Colores de gradientes (estilo DRAFTEA)
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      primaryRed,
-      secondaryRed,
+      primaryPurple,
+      Color(0xFF8B5CF6),
+    ],
+  );
+
+  // Gradiente del header: violeta a negro
+  static const LinearGradient headerGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      primaryPurple,
+      Color(0xFF4C1D95), // Violeta más oscuro
+      Color(0xFF1A1A1A), // Casi negro
+      backgroundDark, // Negro profundo
+    ],
+  );
+
+  // Gradiente verde-amarillo para odds/multiplicadores (estilo DRAFTEA)
+  static const LinearGradient oddsGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF10B981), // Verde
+      Color(0xFFFFCB05), // Amarillo
     ],
   );
 
@@ -67,12 +92,16 @@ class AppColors {
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: [
-      backgroundLight,
-      Color(0xFFE5E5E5),
+      backgroundDark,
+      Color(0xFF0A0A0A),
     ],
   );
 
   // Colores de sombra
   static const Color shadowLight = Color(0x1A000000);
   static const Color shadowDark = Color(0x33000000);
+  
+  // Color para tabs seleccionados (estilo DRAFTEA)
+  static const Color selectedTabBackground = primaryPurple;
+  static const Color unselectedTabText = Color(0xFFFFFFFF);
 }

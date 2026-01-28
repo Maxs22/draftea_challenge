@@ -18,6 +18,7 @@ class PokemonCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: AppConstants.cardElevation,
+      color: AppColors.surfaceDark,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppConstants.defaultBorderRadius),
       ),
@@ -52,6 +53,7 @@ class PokemonCardWidget extends StatelessWidget {
                     return const Center(
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
+                        color: AppColors.primaryPurple,
                       ),
                     );
                   },

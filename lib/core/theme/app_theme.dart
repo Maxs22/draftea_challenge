@@ -5,36 +5,42 @@ import '../constants/app_colors.dart';
 class AppTheme {
   AppTheme._();
 
-  /// Tema claro
+  /// Tema claro (ahora usa estilo oscuro DRAFTEA)
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
+      brightness: Brightness.dark,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primaryRed,
-        primary: AppColors.primaryRed,
-        secondary: AppColors.primaryBlue,
-        surface: AppColors.surfaceLight,
+        seedColor: AppColors.primaryPurple,
+        brightness: Brightness.dark,
+        primary: AppColors.primaryPurple,
+        secondary: AppColors.primaryPurple,
+        surface: AppColors.surfaceDark,
         error: AppColors.error,
         onPrimary: AppColors.textLight,
         onSecondary: AppColors.textLight,
         onSurface: AppColors.textPrimary,
         onError: AppColors.textLight,
       ),
-      scaffoldBackgroundColor: AppColors.backgroundLight,
+      scaffoldBackgroundColor: AppColors.backgroundDark,
       cardTheme: CardThemeData(
+        color: AppColors.surfaceDark,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
+        elevation: 2,
+        shadowColor: AppColors.shadowDark,
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.primaryRed,
+        backgroundColor: Colors.transparent,
         foregroundColor: AppColors.textLight,
-        centerTitle: true,
+        centerTitle: false,
         elevation: 0,
+        iconTheme: IconThemeData(color: AppColors.textLight),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryRed,
+          backgroundColor: AppColors.primaryPurple,
           foregroundColor: AppColors.textLight,
           padding: const EdgeInsets.symmetric(
             horizontal: 24,
@@ -45,33 +51,19 @@ class AppTheme {
           ),
         ),
       ),
+      textTheme: const TextTheme(
+        bodyLarge: TextStyle(color: AppColors.textPrimary),
+        bodyMedium: TextStyle(color: AppColors.textPrimary),
+        bodySmall: TextStyle(color: AppColors.textSecondary),
+        titleLarge: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+        titleMedium: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+        titleSmall: TextStyle(color: AppColors.textPrimary),
+      ),
     );
   }
 
-  /// Tema oscuro (opcional para futuro)
+  /// Tema oscuro (igual que lightTheme para consistencia)
   static ThemeData get darkTheme {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primaryRed,
-        brightness: Brightness.dark,
-        primary: AppColors.primaryRed,
-        secondary: AppColors.primaryBlue,
-        surface: AppColors.surfaceDark,
-        error: AppColors.error,
-      ),
-      scaffoldBackgroundColor: AppColors.backgroundDark,
-      cardTheme: CardThemeData(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.primaryRed,
-        foregroundColor: AppColors.textLight,
-        centerTitle: true,
-        elevation: 0,
-      ),
-    );
+    return lightTheme;
   }
 }
