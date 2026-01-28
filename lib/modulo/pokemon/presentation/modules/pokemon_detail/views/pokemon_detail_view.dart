@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../../core/constants/app_colors.dart';
 import '../../../../../../core/constants/app_constants.dart';
+import '../../../../data/models/pokemon_model.dart';
 import '../../../../data/repositories/pokemon_repository_impl.dart';
 import '../cubit/pokemon_detail_cubit.dart';
 
@@ -73,7 +74,7 @@ class PokemonDetailView extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailContent(BuildContext context, pokemon) {
+  Widget _buildDetailContent(BuildContext context, PokemonModel pokemon) {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -159,31 +160,31 @@ class PokemonDetailView extends StatelessWidget {
                   const SizedBox(height: 24),
                 ],
                 // Estadísticas básicas
-                Row(
-                  children: [
-                    if (pokemon.height != null) ...[
-                      Expanded(
-                        child: _buildStatCard(
-                          context,
-                          'Altura',
-                          '${pokemon.heightInMeters.toStringAsFixed(1)} m',
-                          Icons.height,
+                if (pokemon.height != null || pokemon.weight != null)
+                  Row(
+                    children: [
+                      if (pokemon.height != null) ...[
+                        Expanded(
+                          child: _buildStatCard(
+                            context,
+                            'Altura',
+                            '${pokemon.heightInMeters.toStringAsFixed(1)} m',
+                            Icons.height,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 16),
-                    ],
-                    if (pokemon.weight != null) ...[
-                      Expanded(
-                        child: _buildStatCard(
-                          context,
-                          'Peso',
-                          '${pokemon.weightInKg.toStringAsFixed(1)} kg',
-                          Icons.scale,
+                        if (pokemon.weight != null) const SizedBox(width: 16),
+                      ],
+                      if (pokemon.weight != null)
+                        Expanded(
+                          child: _buildStatCard(
+                            context,
+                            'Peso',
+                            '${pokemon.weightInKg.toStringAsFixed(1)} kg',
+                            Icons.scale,
+                          ),
                         ),
-                      ),
                     ],
-                  ],
-                ),
+                  ),
                 if (pokemon.baseExperience != null) ...[
                   const SizedBox(height: 16),
                   _buildStatCard(
@@ -267,11 +268,17 @@ class PokemonDetailView extends StatelessWidget {
 
   String _capitalizeName(String name) {
     if (name.isEmpty) return name;
-    return '${name[0].toUpperCase()}${name.substring(1)}';
+    try {
+      return '${name[0].toUpperCase()}${name.substring(1)}';
+    } catch (e) {
+      return name;
+    }
   }
 
   Color _getTypeColor(String type) {
-    final typeColors = {
+    if (type.isEmpty) return AppColors.typeNormal;
+    
+    final typeColors = <String, Color>{
       'normal': AppColors.typeNormal,
       'fire': AppColors.typeFire,
       'water': AppColors.typeWater,
