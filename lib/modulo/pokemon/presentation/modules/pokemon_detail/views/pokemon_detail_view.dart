@@ -141,25 +141,28 @@ class PokemonDetailView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Imagen del Pokémon
+          // Imagen del Pokémon con Hero para transición suave
           Container(
             height: 300,
             color: AppColors.backgroundDark,
             child: Center(
-              child: Image.network(
-                pokemon.imageUrl,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(
-                    Icons.image_not_supported,
-                    size: 100,
-                    color: AppColors.textSecondary,
-                  );
-                },
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return const CircularProgressIndicator();
-                },
+              child: Hero(
+                tag: 'pokemon_image_${pokemon.id}',
+                child: Image.network(
+                  pokemon.imageUrl,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(
+                      Icons.image_not_supported,
+                      size: 100,
+                      color: AppColors.textSecondary,
+                    );
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return const CircularProgressIndicator();
+                  },
+                ),
               ),
             ),
           ),

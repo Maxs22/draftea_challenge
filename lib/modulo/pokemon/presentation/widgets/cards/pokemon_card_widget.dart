@@ -30,7 +30,7 @@ class PokemonCardWidget extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Imagen del Pokémon
+              // Imagen del Pokémon con Hero para transición suave
               Expanded(
                 child: Builder(
                   builder: (context) {
@@ -39,7 +39,7 @@ class PokemonCardWidget extends StatelessWidget {
                         Theme.of(context).platform == TargetPlatform.macOS;
                     
                     // Limitar tamaño máximo de imagen en web
-                    return isWeb
+                    final imageWidget = isWeb
                         ? ConstrainedBox(
                             constraints: const BoxConstraints(
                               maxHeight: 160,
@@ -98,6 +98,12 @@ class PokemonCardWidget extends StatelessWidget {
                               );
                             },
                           );
+                    
+                    // Hero widget para transición suave de la imagen
+                    return Hero(
+                      tag: 'pokemon_image_${pokemon.id}',
+                      child: imageWidget,
+                    );
                   },
                 ),
               ),

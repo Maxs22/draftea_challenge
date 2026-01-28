@@ -8,6 +8,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/draftea_logo.dart';
 import '../../../../core/services/cache_service.dart';
 import '../../../../core/services/connectivity_service.dart';
+import '../../../../core/utils/route_transitions.dart';
 import '../../data/models/pokemon_model.dart';
 import '../../data/repositories/pokemon_repository_impl.dart';
 import '../widgets/cards/pokemon_card_widget.dart';
@@ -302,8 +303,8 @@ class _PokedexViewState extends State<PokedexView> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => PokemonDetailView(
+              RouteTransitions.smoothRoute(
+                PokemonDetailView(
                   pokemonId: pokemon.id.toString(),
                 ),
               ),
