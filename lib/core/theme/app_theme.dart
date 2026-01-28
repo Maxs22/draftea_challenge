@@ -13,18 +13,15 @@ class AppTheme {
         seedColor: AppColors.primaryRed,
         primary: AppColors.primaryRed,
         secondary: AppColors.primaryBlue,
-        background: AppColors.backgroundLight,
         surface: AppColors.surfaceLight,
         error: AppColors.error,
         onPrimary: AppColors.textLight,
         onSecondary: AppColors.textLight,
-        onBackground: AppColors.textPrimary,
         onSurface: AppColors.textPrimary,
         onError: AppColors.textLight,
       ),
       scaffoldBackgroundColor: AppColors.backgroundLight,
-      cardTheme: CardTheme(
-        elevation: AppColors.shadowLight.alpha,
+      cardTheme: CardThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -60,13 +57,11 @@ class AppTheme {
         brightness: Brightness.dark,
         primary: AppColors.primaryRed,
         secondary: AppColors.primaryBlue,
-        background: AppColors.backgroundDark,
         surface: AppColors.surfaceDark,
         error: AppColors.error,
       ),
       scaffoldBackgroundColor: AppColors.backgroundDark,
-      cardTheme: CardTheme(
-        elevation: AppColors.shadowDark.alpha,
+      cardTheme: CardThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),

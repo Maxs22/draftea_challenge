@@ -3,7 +3,7 @@ import 'core/config/web_config.dart';
 import 'core/config/mobile_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_constants.dart';
-import 'presentation/modules/pokedex/views/pokedex_view.dart';
+import 'modulo/pokemon/presentation/views/pokedex_view.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,6 +1,6 @@
 import 'dart:convert';
+import 'package:draftea_challenge/core/constants/app_constants.dart';
 import 'package:http/http.dart' as http;
-import '../../core/constants/app_constants.dart';
 import '../models/pokemon_list_response_model.dart';
 import '../models/pokemon_model.dart';
 

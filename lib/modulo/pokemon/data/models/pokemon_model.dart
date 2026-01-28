@@ -1,5 +1,5 @@
+import 'package:draftea_challenge/core/constants/app_constants.dart';
 import 'package:equatable/equatable.dart';
-import '../../core/constants/app_constants.dart';
 
 /// Modelo de datos para un Pokémon
 class PokemonModel extends Equatable {

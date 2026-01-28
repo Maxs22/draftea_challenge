@@ -1,14 +1,13 @@
+import 'package:draftea_challenge/modulo/pokemon/presentation/cubit/pokedex_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/config/web_config.dart';
 import '../../../../core/config/mobile_config.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../data/models/pokemon_model.dart';
-import '../../../../data/repositories/pokemon_repository_impl.dart';
-import '../../../../domain/repositories/pokemon_repository.dart';
-import '../../../widgets/cards/pokemon_card_widget.dart';
-import '../cubit/pokedex_cubit.dart';
+import '../../data/models/pokemon_model.dart';
+import '../../data/repositories/pokemon_repository_impl.dart';
+import '../widgets/cards/pokemon_card_widget.dart';
 
 /// Vista principal del listado de Pokémon en grid
 class PokedexView extends StatelessWidget {

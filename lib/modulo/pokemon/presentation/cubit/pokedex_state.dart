@@ -51,14 +51,30 @@ extension PokedexStateExtension on PokedexState {
   T when<T>({
     required T Function() initial,
     required T Function() loading,
-    required T Function(List<PokemonModel> pokemonList, bool hasMore) loaded,
+    required T Function(
+      List<PokemonModel> pokemonList,
+      bool hasMore,
+    ) loaded,
     required T Function(String message) error,
   }) {
     return switch (this) {
       _Initial() => initial(),
       _Loading() => loading(),
-      _Loaded(:final pokemonList, :final hasMore) => loaded(pokemonList, hasMore),
+      _Loaded(:final pokemonList, :final hasMore) =>
+        loaded(pokemonList, hasMore),
       _Error(:final message) => error(message),
     };
   }
+
+  /// Obtiene la lista de Pokémon actual si está disponible
+  List<PokemonModel>? get pokemonList => switch (this) {
+        _Loaded(:final pokemonList) => pokemonList,
+        _ => null,
+      };
+
+  /// Indica si hay más páginas disponibles
+  bool get hasMore => switch (this) {
+        _Loaded(:final hasMore) => hasMore,
+        _ => false,
+      };
 }

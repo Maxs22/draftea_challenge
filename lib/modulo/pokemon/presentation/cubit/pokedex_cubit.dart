@@ -1,9 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../domain/repositories/pokemon_repository.dart';
-import '../../../../data/models/pokemon_model.dart';
-import '../../../../data/models/pokemon_list_response_model.dart';
+import '../../domain/repositories/pokemon_repository.dart';
+import '../../data/models/pokemon_model.dart';
 
 part 'pokedex_state.dart';
 
