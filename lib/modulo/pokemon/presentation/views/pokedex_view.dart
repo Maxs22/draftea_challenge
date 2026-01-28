@@ -20,6 +20,7 @@ class PokedexView extends StatefulWidget {
 
 class _PokedexViewState extends State<PokedexView> {
   final ScrollController _scrollController = ScrollController();
+  PokedexCubit? _cubit;
 
   @override
   void initState() {
@@ -29,13 +30,15 @@ class _PokedexViewState extends State<PokedexView> {
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
+    if (!mounted || _cubit == null) return;
     if (_isBottom) {
-      context.read<PokedexCubit>().loadMorePokemon();
+      _cubit!.loadMorePokemon();
     }
   }
 
@@ -51,7 +54,9 @@ class _PokedexViewState extends State<PokedexView> {
     return BlocProvider(
       create: (context) {
         final repository = PokemonRepositoryImpl();
-        return PokedexCubit(repository: repository)..loadPokemonList();
+        final cubit = PokedexCubit(repository: repository)..loadPokemonList();
+        _cubit = cubit;
+        return cubit;
       },
       child: Scaffold(
         appBar: AppBar(
