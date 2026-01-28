@@ -101,6 +101,11 @@ class PokemonModel extends Equatable {
         'name': name,
         'imageUrl': imageUrl,
         'thumbnailUrl': thumbnailUrl,
+        'height': height,
+        'weight': weight,
+        'types': types,
+        'abilities': abilities,
+        'baseExperience': baseExperience,
       };
 
   /// Crea una copia del modelo con campos modificados

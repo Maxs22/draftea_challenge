@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'core/config/web_config.dart';
 import 'core/config/mobile_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_constants.dart';
+import 'core/services/cache_service.dart';
 import 'modulo/pokemon/presentation/views/pokedex_view.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inicializar Hive para caché local
+  await Hive.initFlutter();
+  
+  // Inicializar servicio de caché
+  final cacheService = CacheService();
+  await cacheService.init();
+  
+  // Limpiar caché expirado al iniciar
+  await cacheService.clearExpiredCache();
   
   // Configurar según la plataforma
   WebConfig.configure();

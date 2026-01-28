@@ -6,6 +6,8 @@ import '../../../../core/config/mobile_config.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/draftea_logo.dart';
+import '../../../../core/services/cache_service.dart';
+import '../../../../core/services/connectivity_service.dart';
 import '../../data/models/pokemon_model.dart';
 import '../../data/repositories/pokemon_repository_impl.dart';
 import '../widgets/cards/pokemon_card_widget.dart';
@@ -21,10 +23,35 @@ class PokedexView extends StatefulWidget {
 
 class _PokedexViewState extends State<PokedexView> {
   final ScrollController _scrollController = ScrollController();
+  final ConnectivityService _connectivityService = ConnectivityService();
+  bool _isOnline = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkConnectivity();
+    _connectivityService.connectivityStream.listen((isOnline) {
+      if (mounted) {
+        setState(() {
+          _isOnline = isOnline;
+        });
+      }
+    });
+  }
+
+  Future<void> _checkConnectivity() async {
+    final isOnline = await _connectivityService.isConnected();
+    if (mounted) {
+      setState(() {
+        _isOnline = isOnline;
+      });
+    }
+  }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _connectivityService.dispose();
     super.dispose();
   }
 
@@ -32,7 +59,13 @@ class _PokedexViewState extends State<PokedexView> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) {
-        final repository = PokemonRepositoryImpl();
+        // Usar la instancia singleton de CacheService (ya inicializada en main.dart)
+        final cacheService = CacheService();
+        final connectivityService = ConnectivityService();
+        final repository = PokemonRepositoryImpl(
+          cacheService: cacheService,
+          connectivityService: connectivityService,
+        );
         return PokedexCubit(repository: repository)..loadPokemonList();
       },
       child: Scaffold(
@@ -48,6 +81,30 @@ class _PokedexViewState extends State<PokedexView> {
               foregroundColor: AppColors.textLight,
               centerTitle: false,
               elevation: 0,
+              actions: [
+                // Indicador de estado offline
+                if (!_isOnline)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16.0),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.cloud_off,
+                          size: 20,
+                          color: AppColors.textLight,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Offline',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textLight.withValues(alpha: 0.8),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
             ),
           ),
         ),

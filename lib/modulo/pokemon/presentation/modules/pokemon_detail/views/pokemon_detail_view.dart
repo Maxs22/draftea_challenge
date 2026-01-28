@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../../core/constants/app_colors.dart';
 import '../../../../../../core/constants/app_constants.dart';
+import '../../../../../../core/services/cache_service.dart';
+import '../../../../../../core/services/connectivity_service.dart';
 import '../../../../data/models/pokemon_model.dart';
 import '../../../../data/repositories/pokemon_repository_impl.dart';
 import '../cubit/pokemon_detail_cubit.dart';
@@ -17,13 +19,42 @@ class PokemonDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) {
-        final repository = PokemonRepositoryImpl();
-        return PokemonDetailCubit(repository: repository)
-          ..loadPokemonDetail(pokemonId);
+    return FutureBuilder<void>(
+      future: _ensureCacheInitialized(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        
+        return BlocProvider(
+          create: (context) {
+            // Usar la instancia singleton de CacheService (ya inicializada en main.dart)
+            final cacheService = CacheService();
+            final connectivityService = ConnectivityService();
+            final repository = PokemonRepositoryImpl(
+              cacheService: cacheService,
+              connectivityService: connectivityService,
+            );
+            return PokemonDetailCubit(repository: repository)
+              ..loadPokemonDetail(pokemonId);
+          },
+          child: _buildScaffold(),
+        );
       },
-      child: Scaffold(
+    );
+  }
+
+  Future<void> _ensureCacheInitialized() async {
+    final cacheService = CacheService();
+    if (!cacheService.isInitialized) {
+      await cacheService.init();
+    }
+  }
+
+  Widget _buildScaffold() {
+    return Scaffold(
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(kToolbarHeight),
           child: Container(
@@ -78,7 +109,6 @@ class PokemonDetailView extends StatelessWidget {
             );
           },
         ),
-      ),
     );
   }
 
