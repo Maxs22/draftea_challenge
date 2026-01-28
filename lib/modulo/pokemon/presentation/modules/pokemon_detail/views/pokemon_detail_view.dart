@@ -40,7 +40,9 @@ class PokemonDetailView extends StatelessWidget {
             return PokemonDetailCubit(repository: repository)
               ..loadPokemonDetail(pokemonId);
           },
-          child: _buildScaffold(),
+          child: Builder(
+            builder: (context) => _buildScaffold(context),
+          ),
         );
       },
     );
@@ -53,10 +55,17 @@ class PokemonDetailView extends StatelessWidget {
     }
   }
 
-  Widget _buildScaffold() {
+  Widget _buildScaffold(BuildContext context) {
+    final isWeb = Theme.of(context).platform == TargetPlatform.windows ||
+        Theme.of(context).platform == TargetPlatform.linux ||
+        Theme.of(context).platform == TargetPlatform.macOS;
+    
     return Scaffold(
         appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(kToolbarHeight),
+          preferredSize: Size.fromHeight(
+            // Altura más grande en web
+            isWeb ? kToolbarHeight * 1.3 : kToolbarHeight,
+          ),
           child: Container(
             decoration: const BoxDecoration(
               gradient: AppColors.headerGradient,
@@ -65,12 +74,13 @@ class PokemonDetailView extends StatelessWidget {
               backgroundColor: Colors.transparent,
               foregroundColor: AppColors.textLight,
               elevation: 0,
+              toolbarHeight: isWeb ? kToolbarHeight * 1.3 : kToolbarHeight,
             ),
           ),
         ),
         body: BlocBuilder<PokemonDetailCubit, PokemonDetailState>(
           builder: (context, state) {
-            return state.when(
+            Widget content = state.when(
               initial: () => const SizedBox.shrink(),
               loading: () => const Center(
                 child: CircularProgressIndicator(),
@@ -107,6 +117,20 @@ class PokemonDetailView extends StatelessWidget {
                 ),
               ),
             );
+            
+            // En web, centrar el contenido con márgenes laterales
+            if (isWeb) {
+              return Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: AppConstants.maxContentWidth,
+                  ),
+                  child: content,
+                ),
+              );
+            }
+            
+            return content;
           },
         ),
     );

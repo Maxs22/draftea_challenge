@@ -32,30 +32,72 @@ class PokemonCardWidget extends StatelessWidget {
             children: [
               // Imagen del Pokémon
               Expanded(
-                child: Image.network(
-                  pokemon.imageUrl,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.network(
-                      pokemon.thumbnailUrl ?? pokemon.imageUrl,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.image_not_supported,
-                          size: 48,
-                          color: AppColors.textSecondary,
-                        );
-                      },
-                    );
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.primaryPurple,
-                      ),
-                    );
+                child: Builder(
+                  builder: (context) {
+                    final isWeb = Theme.of(context).platform == TargetPlatform.windows ||
+                        Theme.of(context).platform == TargetPlatform.linux ||
+                        Theme.of(context).platform == TargetPlatform.macOS;
+                    
+                    // Limitar tamaño máximo de imagen en web
+                    return isWeb
+                        ? ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              maxHeight: 160,
+                              maxWidth: 160,
+                            ),
+                            child: Image.network(
+                              pokemon.imageUrl,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.network(
+                                  pokemon.thumbnailUrl ?? pokemon.imageUrl,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Icon(
+                                      Icons.image_not_supported,
+                                      size: 48,
+                                      color: AppColors.textSecondary,
+                                    );
+                                  },
+                                );
+                              },
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return const Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primaryPurple,
+                                  ),
+                                );
+                              },
+                            ),
+                          )
+                        : Image.network(
+                            pokemon.imageUrl,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.network(
+                                pokemon.thumbnailUrl ?? pokemon.imageUrl,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Icon(
+                                    Icons.image_not_supported,
+                                    size: 48,
+                                    color: AppColors.textSecondary,
+                                  );
+                                },
+                              );
+                            },
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return const Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.primaryPurple,
+                                ),
+                              );
+                            },
+                          );
                   },
                 ),
               ),

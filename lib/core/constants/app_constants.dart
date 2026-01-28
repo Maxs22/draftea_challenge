@@ -26,6 +26,9 @@ class AppConstants {
   static const double mobileBreakpoint = 600.0;
   static const double tabletBreakpoint = 900.0;
   static const double desktopBreakpoint = 1200.0;
+  
+  // Ancho máximo del contenido en web
+  static const double maxContentWidth = 1400.0;
 
   // Animation Durations
   static const Duration shortAnimationDuration = Duration(milliseconds: 200);

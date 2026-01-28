@@ -5,6 +5,7 @@ import 'core/config/mobile_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_constants.dart';
 import 'core/services/cache_service.dart';
+import 'core/widgets/splash_screen.dart';
 import 'modulo/pokemon/presentation/views/pokedex_view.dart';
 
 void main() async {
@@ -38,7 +39,33 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.light,
-      home: const PokedexView(),
+      home: const SplashScreenWrapper(),
     );
+  }
+}
+
+/// Wrapper para manejar la navegación desde el splash screen
+class SplashScreenWrapper extends StatefulWidget {
+  const SplashScreenWrapper({super.key});
+
+  @override
+  State<SplashScreenWrapper> createState() => _SplashScreenWrapperState();
+}
+
+class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
+  bool _showSplash = true;
+
+  void _navigateToHome() {
+    setState(() {
+      _showSplash = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_showSplash) {
+      return SplashScreen(onAnimationComplete: _navigateToHome);
+    }
+    return const PokedexView();
   }
 }

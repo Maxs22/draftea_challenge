@@ -26,6 +26,10 @@ class _PokedexViewState extends State<PokedexView> {
   final ConnectivityService _connectivityService = ConnectivityService();
   bool _isOnline = true;
 
+  bool get isWeb => Theme.of(context).platform == TargetPlatform.windows ||
+                    Theme.of(context).platform == TargetPlatform.linux ||
+                    Theme.of(context).platform == TargetPlatform.macOS;
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +61,7 @@ class _PokedexViewState extends State<PokedexView> {
 
   @override
   Widget build(BuildContext context) {
+    
     return BlocProvider(
       create: (context) {
         // Usar la instancia singleton de CacheService (ya inicializada en main.dart)
@@ -70,17 +75,21 @@ class _PokedexViewState extends State<PokedexView> {
       },
       child: Scaffold(
         appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(kToolbarHeight),
+          preferredSize: Size.fromHeight(
+            // Altura más grande en web
+            isWeb ? kToolbarHeight * 1.3 : kToolbarHeight,
+          ),
           child: Container(
             decoration: const BoxDecoration(
               gradient: AppColors.headerGradient,
             ),
             child: AppBar(
-              title: const DrafteaLogo(height: 20),
+              title: const DrafteaLogo(),
               backgroundColor: Colors.transparent,
               foregroundColor: AppColors.textLight,
               centerTitle: false,
               elevation: 0,
+              toolbarHeight: isWeb ? kToolbarHeight * 1.3 : kToolbarHeight,
               actions: [
                 // Indicador de estado offline
                 if (!_isOnline)
@@ -88,16 +97,16 @@ class _PokedexViewState extends State<PokedexView> {
                     padding: const EdgeInsets.only(right: 16.0),
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.cloud_off,
-                          size: 20,
+                          size: isWeb ? 24 : 20,
                           color: AppColors.textLight,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           'Offline',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: isWeb ? 14 : 12,
                             color: AppColors.textLight.withValues(alpha: 0.8),
                           ),
                         ),
@@ -110,7 +119,7 @@ class _PokedexViewState extends State<PokedexView> {
         ),
         body: BlocBuilder<PokedexCubit, PokedexState>(
             builder: (context, state) {
-            return state.when(
+            Widget content = state.when(
               initial: () => const SizedBox.shrink(),
               loading: () => const Center(
                 child: CircularProgressIndicator(),
@@ -207,9 +216,23 @@ class _PokedexViewState extends State<PokedexView> {
                 );
               },
             );
-          },
+            
+            // En web, centrar el contenido con márgenes laterales
+            if (isWeb) {
+              return Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: AppConstants.maxContentWidth,
+                  ),
+                  child: content,
+                ),
+              );
+            }
+            
+            return content;
+            },
+          ),
         ),
-      ),
     );
   }
 
@@ -219,10 +242,6 @@ class _PokedexViewState extends State<PokedexView> {
     bool hasMore, {
     bool isLoadingMore = false,
   }) {
-    final isWeb = Theme.of(context).platform == TargetPlatform.windows ||
-        Theme.of(context).platform == TargetPlatform.linux ||
-        Theme.of(context).platform == TargetPlatform.macOS;
-
     final crossAxisCount = isWeb
         ? WebConfig.getGridColumnCount(context)
         : MobileConfig.getGridColumnCount(context);
@@ -246,15 +265,20 @@ class _PokedexViewState extends State<PokedexView> {
         }
         return false;
       },
-      child: GridView.builder(
-        controller: _scrollController,
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          childAspectRatio: 0.75,
-          crossAxisSpacing: AppConstants.defaultPadding,
-          mainAxisSpacing: AppConstants.defaultPadding,
-        ),
+      child: Builder(
+        builder: (context) {
+          // Ajustar aspect ratio según plataforma (más pequeño en web)
+          final aspectRatio = isWeb ? 0.95 : 0.75; // Cards más compactas en web (imágenes más pequeñas)
+
+          return GridView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.all(AppConstants.defaultPadding),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              childAspectRatio: aspectRatio,
+              crossAxisSpacing: AppConstants.defaultPadding,
+              mainAxisSpacing: AppConstants.defaultPadding,
+            ),
         itemCount: pokemonList.length + (isLoadingMore ? 1 : 0),
         itemBuilder: (context, index) {
         // Mostrar indicador de carga al final si está cargando más
@@ -286,6 +310,8 @@ class _PokedexViewState extends State<PokedexView> {
             );
           },
         );
+        },
+          );
         },
       ),
     );
