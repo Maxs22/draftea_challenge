@@ -15,7 +15,6 @@ class DrafteaLogo extends StatelessWidget {
   double _getHeight(BuildContext context) {
     final height = _height;
     if (height != null) return height;
-    // Tamaño más grande en web
     if (kIsWeb) {
       return 32;
     }
@@ -28,7 +27,7 @@ class DrafteaLogo extends StatelessWidget {
     return SvgPicture.asset(
       'assets/logo.svg',
       height: height,
-      width: height * 3.625, // Mantener proporción del SVG (58/16)
+      width: height * 3.625,
       colorFilter: const ColorFilter.mode(
         AppColors.textLight,
         BlendMode.srcIn,

@@ -28,32 +28,41 @@ class PokemonRepositoryImpl implements PokemonRepository {
 
     if (isOnline) {
       try {
-        // Intentar obtener desde la API
         final response = await _apiService.getPokemonList(
           limit: limit,
           offset: offset,
         );
-        
-        // Guardar en caché después de obtener exitosamente
         await _cacheService.cachePokemonList(response, offset);
-        
         return response;
       } catch (e) {
-        // Si falla la API, intentar obtener del caché
-        final cachedData = _cacheService.getCachedPokemonList(offset);
-        if (cachedData != null) {
-          return cachedData;
-        }
+        final cachedData = await _getCachedData(offset);
+        if (cachedData != null) return cachedData;
         throw Exception('Error al obtener la lista de Pokémon: $e');
       }
     } else {
-      // Modo offline: obtener del caché
-      final cachedData = _cacheService.getCachedPokemonList(offset);
-      if (cachedData != null) {
-        return cachedData;
-      }
+      final cachedData = await _getCachedData(offset);
+      if (cachedData != null) return cachedData;
       throw Exception('Sin conexión y no hay datos en caché');
     }
+  }
+
+  Future<PokemonListResponseModel?> _getCachedData(int offset) async {
+    if (!_cacheService.isInitialized) {
+      await _cacheService.init();
+      await Future.delayed(const Duration(milliseconds: 50));
+    }
+
+    var cachedData = _cacheService.getCachedPokemonList(offset);
+    if (cachedData != null && cachedData.results.isNotEmpty) return cachedData;
+
+    if (offset == 0) {
+      for (int tryOffset = 0; tryOffset <= 100; tryOffset += 20) {
+        cachedData = _cacheService.getCachedPokemonList(tryOffset);
+        if (cachedData != null && cachedData.results.isNotEmpty) return cachedData;
+      }
+    }
+
+    return null;
   }
 
   @override
@@ -62,28 +71,27 @@ class PokemonRepositoryImpl implements PokemonRepository {
 
     if (isOnline) {
       try {
-        // Intentar obtener desde la API
         final pokemon = await _apiService.getPokemonDetail(idOrName);
-        
-        // Guardar en caché después de obtener exitosamente
         await _cacheService.cachePokemonDetail(pokemon);
-        
         return pokemon;
       } catch (e) {
-        // Si falla la API, intentar obtener del caché
-        final cachedPokemon = _cacheService.getCachedPokemonDetail(idOrName);
-        if (cachedPokemon != null) {
-          return cachedPokemon;
-        }
+        final cachedPokemon = await _getCachedDetail(idOrName);
+        if (cachedPokemon != null) return cachedPokemon;
         throw Exception('Error al obtener el detalle del Pokémon: $e');
       }
     } else {
-      // Modo offline: obtener del caché
-      final cachedPokemon = _cacheService.getCachedPokemonDetail(idOrName);
-      if (cachedPokemon != null) {
-        return cachedPokemon;
-      }
+      final cachedPokemon = await _getCachedDetail(idOrName);
+      if (cachedPokemon != null) return cachedPokemon;
       throw Exception('Sin conexión y no hay datos en caché');
     }
+  }
+
+  /// Asegura que el caché esté inicializado y obtiene el detalle desde caché.
+  Future<PokemonModel?> _getCachedDetail(String idOrName) async {
+    if (!_cacheService.isInitialized) {
+      await _cacheService.init();
+      await Future.delayed(const Duration(milliseconds: 50));
+    }
+    return _cacheService.getCachedPokemonDetail(idOrName);
   }
 }

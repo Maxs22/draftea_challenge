@@ -29,7 +29,6 @@ class CacheService {
   /// Inicializa las cajas de Hive para el caché
   Future<void> init() async {
     if (_isInitialized) return;
-    
     _pokemonListBox = await Hive.openBox(_pokemonListBoxName);
     _pokemonDetailBox = await Hive.openBox(_pokemonDetailBoxName);
     _isInitialized = true;
@@ -40,55 +39,58 @@ class CacheService {
     PokemonListResponseModel response,
     int offset,
   ) async {
-    // Asegurar que esté inicializado
-    if (!_isInitialized) {
-      await init();
-    }
-    
+    if (!_isInitialized) await init();
     if (_pokemonListBox == null) return;
 
-    // Guardar la lista con clave basada en offset
-    await _pokemonListBox!.put(
-      'list_$offset',
-      {
-        'results': response.results.map((p) => p.toJson()).toList(),
-        'next': response.next,
-        'previous': response.previous,
-        'count': response.count,
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-      },
-    );
-
-    // Guardar timestamp de última actualización
-    await _pokemonListBox!.put(_cacheTimestampKey, DateTime.now().millisecondsSinceEpoch);
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final dataToSave = {
+      'results': response.results.map((p) => p.toJson()).toList(),
+      'next': response.next,
+      'previous': response.previous,
+      'count': response.count,
+      'timestamp': timestamp,
+    };
+    await _pokemonListBox!.put('list_$offset', dataToSave);
+    await _pokemonListBox!.put(_cacheTimestampKey, timestamp);
   }
 
   /// Obtiene la lista de Pokémon desde caché
   PokemonListResponseModel? getCachedPokemonList(int offset) {
-    // Asegurar que esté inicializado
-    if (!_isInitialized) {
-      // Si no está inicializado, retornar null
-      return null;
-    }
-    
-    if (_pokemonListBox == null) return null;
-
-    final cachedData = _pokemonListBox!.get('list_$offset');
-    if (cachedData == null) return null;
-
-    final data = cachedData as Map<dynamic, dynamic>;
-    final timestamp = data['timestamp'] as int;
-    final cacheAge = DateTime.now().millisecondsSinceEpoch - timestamp;
-
-    // Verificar si el caché no ha expirado (24 horas)
-    if (cacheAge > AppConstants.cacheExpirationDuration.inMilliseconds) {
-      return null;
-    }
+    if (!_isInitialized || _pokemonListBox == null) return null;
 
     try {
-      final results = (data['results'] as List)
-          .map((json) => PokemonModel.fromListJson(json as Map<String, dynamic>))
+      final cachedData = _pokemonListBox!.get('list_$offset');
+      if (cachedData == null) return null;
+
+      final data = cachedData as Map<dynamic, dynamic>;
+      if (!data.containsKey('timestamp') || !data.containsKey('results')) {
+        return null;
+      }
+
+      final timestamp = data['timestamp'] as int;
+      final cacheAge = DateTime.now().millisecondsSinceEpoch - timestamp;
+      final expirationMs = AppConstants.cacheExpirationDuration.inMilliseconds;
+      if (cacheAge > expirationMs) return null;
+
+      final resultsList = data['results'] as List?;
+      if (resultsList == null || resultsList.isEmpty) return null;
+
+      final results = resultsList
+          .map((json) {
+            try {
+              final jsonMap = json as Map<dynamic, dynamic>;
+              final stringMap = Map<String, dynamic>.from(
+                jsonMap.map((key, value) => MapEntry(key.toString(), value)),
+              );
+              return PokemonModel.fromJson(stringMap);
+            } catch (_) {
+              return null;
+            }
+          })
+          .whereType<PokemonModel>()
           .toList();
+
+      if (results.isEmpty) return null;
 
       return PokemonListResponseModel(
         results: results,
@@ -96,18 +98,14 @@ class CacheService {
         previous: data['previous'] as String?,
         count: data['count'] as int? ?? 0,
       );
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }
 
   /// Guarda el detalle de un Pokémon en caché
   Future<void> cachePokemonDetail(PokemonModel pokemon) async {
-    // Asegurar que esté inicializado
-    if (!_isInitialized) {
-      await init();
-    }
-    
+    if (!_isInitialized) await init();
     if (_pokemonDetailBox == null) return;
 
     await _pokemonDetailBox!.put(
@@ -121,14 +119,7 @@ class CacheService {
 
   /// Obtiene el detalle de un Pokémon desde caché
   PokemonModel? getCachedPokemonDetail(String idOrName) {
-    // Asegurar que esté inicializado (síncrono para no cambiar la firma)
-    if (!_isInitialized) {
-      // Si no está inicializado, intentar inicializar de forma síncrona
-      // En este caso, retornar null ya que no podemos esperar
-      return null;
-    }
-    
-    if (_pokemonDetailBox == null) return null;
+    if (!_isInitialized || _pokemonDetailBox == null) return null;
 
     // Intentar buscar por ID primero
     int? id = int.tryParse(idOrName);
@@ -161,30 +152,19 @@ class CacheService {
       final timestamp = data['timestamp'] as int;
       final cacheAge = DateTime.now().millisecondsSinceEpoch - timestamp;
 
-      // Verificar si el caché no ha expirado (24 horas)
       if (cacheAge > AppConstants.cacheExpirationDuration.inMilliseconds) {
         return null;
       }
 
-      final pokemonJson = data['pokemon'] as Map<String, dynamic>;
-      
-      // Reconstruir el modelo completo desde el JSON guardado
-      return PokemonModel(
-        id: pokemonJson['id'] as int,
-        name: pokemonJson['name'] as String,
-        imageUrl: pokemonJson['imageUrl'] as String,
-        thumbnailUrl: pokemonJson['thumbnailUrl'] as String?,
-        height: pokemonJson['height'] as int?,
-        weight: pokemonJson['weight'] as int?,
-        types: pokemonJson['types'] != null
-            ? List<String>.from(pokemonJson['types'] as List)
-            : null,
-        abilities: pokemonJson['abilities'] != null
-            ? List<String>.from(pokemonJson['abilities'] as List)
-            : null,
-        baseExperience: pokemonJson['baseExperience'] as int?,
+      // Hive devuelve Map<dynamic, dynamic>, convertir a Map<String, dynamic>
+      final pokemonRaw = data['pokemon'];
+      if (pokemonRaw == null || pokemonRaw is! Map) return null;
+      final pokemonJson = Map<String, dynamic>.from(
+        Map.from(pokemonRaw).map((key, value) => MapEntry(key.toString(), value)),
       );
-    } catch (e) {
+
+      return PokemonModel.fromJson(pokemonJson);
+    } catch (_) {
       return null;
     }
   }

@@ -80,4 +80,16 @@ class PokedexCubit extends Cubit<PokedexState> {
       ));
     }
   }
+
+  /// Limpia el error de "cargar más" (p. ej. al recuperar conexión).
+  void clearLoadMoreError() {
+    final currentState = state;
+    if (currentState is _ErrorLoadingMore) {
+      emit(PokedexState.loaded(
+        pokemonList: currentState.pokemonList,
+        hasMore: currentState.hasMore,
+        currentOffset: currentState.currentOffset,
+      ));
+    }
+  }
 }

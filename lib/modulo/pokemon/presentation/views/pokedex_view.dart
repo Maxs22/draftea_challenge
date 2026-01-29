@@ -26,6 +26,7 @@ class _PokedexViewState extends State<PokedexView> {
   final ScrollController _scrollController = ScrollController();
   final ConnectivityService _connectivityService = ConnectivityService();
   bool _isOnline = true;
+  PokedexCubit? _pokedexCubit;
 
   bool get isWeb => Theme.of(context).platform == TargetPlatform.windows ||
                     Theme.of(context).platform == TargetPlatform.linux ||
@@ -37,9 +38,8 @@ class _PokedexViewState extends State<PokedexView> {
     _checkConnectivity();
     _connectivityService.connectivityStream.listen((isOnline) {
       if (mounted) {
-        setState(() {
-          _isOnline = isOnline;
-        });
+        if (isOnline) _pokedexCubit?.clearLoadMoreError();
+        setState(() => _isOnline = isOnline);
       }
     });
   }
@@ -65,19 +65,17 @@ class _PokedexViewState extends State<PokedexView> {
     
     return BlocProvider(
       create: (context) {
-        // Usar la instancia singleton de CacheService (ya inicializada en main.dart)
-        final cacheService = CacheService();
-        final connectivityService = ConnectivityService();
         final repository = PokemonRepositoryImpl(
-          cacheService: cacheService,
-          connectivityService: connectivityService,
+          cacheService: CacheService(),
+          connectivityService: _connectivityService,
         );
-        return PokedexCubit(repository: repository)..loadPokemonList();
+        final cubit = PokedexCubit(repository: repository)..loadPokemonList();
+        _pokedexCubit = cubit;
+        return cubit;
       },
       child: Scaffold(
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(
-            // Altura más grande en web
             isWeb ? kToolbarHeight * 1.3 : kToolbarHeight,
           ),
           child: Container(
@@ -92,7 +90,6 @@ class _PokedexViewState extends State<PokedexView> {
               elevation: 0,
               toolbarHeight: isWeb ? kToolbarHeight * 1.3 : kToolbarHeight,
               actions: [
-                // Indicador de estado offline
                 if (!_isOnline)
                   Padding(
                     padding: const EdgeInsets.only(right: 16.0),
@@ -217,8 +214,7 @@ class _PokedexViewState extends State<PokedexView> {
                 );
               },
             );
-            
-            // En web, centrar el contenido con márgenes laterales
+
             if (isWeb) {
               return Center(
                 child: ConstrainedBox(
@@ -251,14 +247,12 @@ class _PokedexViewState extends State<PokedexView> {
       onNotification: (ScrollNotification scrollInfo) {
         if (scrollInfo is ScrollUpdateNotification) {
           final metrics = scrollInfo.metrics;
-          
-          // Verificar que tenemos un maxScrollExtent válido
+
           if (metrics.maxScrollExtent > 0 && 
               metrics.pixels >= metrics.maxScrollExtent * 0.8) {
             final cubit = context.read<PokedexCubit>();
             final currentState = cubit.state;
-            
-            // Solo cargar más si hay más disponible y no está cargando
+
             if (currentState.hasMore && !currentState.isLoadingMore) {
               cubit.loadMorePokemon();
             }
@@ -268,8 +262,7 @@ class _PokedexViewState extends State<PokedexView> {
       },
       child: Builder(
         builder: (context) {
-          // Ajustar aspect ratio según plataforma (más pequeño en web)
-          final aspectRatio = isWeb ? 0.95 : 0.75; // Cards más compactas en web (imágenes más pequeñas)
+          final aspectRatio = isWeb ? 0.95 : 0.75;
 
           return GridView.builder(
             controller: _scrollController,
@@ -282,7 +275,6 @@ class _PokedexViewState extends State<PokedexView> {
             ),
         itemCount: pokemonList.length + (isLoadingMore ? 1 : 0),
         itemBuilder: (context, index) {
-        // Mostrar indicador de carga al final si está cargando más
         if (index == pokemonList.length && isLoadingMore) {
           return const Center(
             child: Padding(
@@ -292,7 +284,6 @@ class _PokedexViewState extends State<PokedexView> {
           );
         }
 
-        // Si el índice es mayor que la lista, no debería pasar
         if (index >= pokemonList.length) {
           return const SizedBox.shrink();
         }

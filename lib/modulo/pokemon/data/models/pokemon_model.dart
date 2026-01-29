@@ -108,6 +108,25 @@ class PokemonModel extends Equatable {
         'baseExperience': baseExperience,
       };
 
+  /// Crea desde JSON guardado en caché (mismo formato que toJson)
+  factory PokemonModel.fromJson(Map<String, dynamic> json) {
+    return PokemonModel(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      imageUrl: json['imageUrl'] as String,
+      thumbnailUrl: json['thumbnailUrl'] as String?,
+      height: json['height'] as int?,
+      weight: json['weight'] as int?,
+      types: json['types'] != null
+          ? List<String>.from(json['types'] as List)
+          : null,
+      abilities: json['abilities'] != null
+          ? List<String>.from(json['abilities'] as List)
+          : null,
+      baseExperience: json['baseExperience'] as int?,
+    );
+  }
+
   /// Crea una copia del modelo con campos modificados
   PokemonModel copyWith({
     int? id,

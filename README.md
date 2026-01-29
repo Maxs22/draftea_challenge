@@ -6,7 +6,10 @@ Aplicación Flutter multiplataforma (iOS, Android y Web) para explorar el mundo 
 
 - ✅ Listado de Pokémon en grid con scroll infinito
 - ✅ Pantalla de detalle con información completa
-- ✅ Soporte online/offline con caché local
+- ✅ Soporte online/offline con caché local (lista y detalle)
+- ✅ Detalle de Pokémon desde caché cuando no hay internet
+- ✅ Banner de error "cargar más" se oculta al recuperar la conexión
+- ✅ Imágenes con caché: `CachedPokemonImage` (web: caché del navegador; mobile: `cached_network_image`)
 - ✅ Diseño responsive para mobile y web
 - ✅ Tema oscuro estilo DRAFTEA
 - ✅ Splash screen animado
@@ -171,6 +174,10 @@ _onScroll() {
 }
 ```
 
+**Recuperación de conexión:**
+- Al volver a tener internet, el banner "Error al cargar más Pokémon" se oculta automáticamente (`PokedexCubit.clearLoadMoreError()` llamado desde el listener de `ConnectivityService`)
+- La lista permanece visible; el usuario puede seguir haciendo scroll y se intentará cargar más al llegar al final
+
 ### Evitar Acoplamiento
 
 - **Interfaces**: El dominio define contratos (`PokemonRepository` en `domain/repositories/`)
@@ -195,6 +202,7 @@ _onScroll() {
 **Cómo funciona:**
 - **Online**: Obtiene de API → Guarda en caché automáticamente (`CacheService.cachePokemonList()` / `cachePokemonDetail()`)
 - **Offline**: Lee del caché → Muestra datos guardados (`getCachedPokemonList()` / `getCachedPokemonDetail()`)
+- **Detalle offline**: Al abrir un Pokémon ya visitado sin conexión, se carga desde `pokemon_detail_cache` (inicialización del caché asegurada en `_getCachedDetail()`)
 - **Expiración**: 24 horas (definido en `AppConstants.cacheExpirationDuration`)
 
 **Versionado e Invalidación:**
@@ -243,9 +251,14 @@ _onScroll() {
 
 ### Limitaciones y Mitigaciones
 
+**Imágenes en web y mobile:**
+- **Web**: `CachedPokemonImage` usa `Image.network()` (caché del navegador); `ImageCacheManager` con `JsonCacheInfoRepository` (sin sqflite)
+- **Mobile**: `CachedNetworkImage` con `DefaultCacheManager` para persistencia en disco
+- Ver `lib/core/widgets/cached_pokemon_image.dart` y `lib/core/services/image_cache_manager.dart`
+
 **Limitaciones:**
 - GIFs animados requieren paquetes adicionales (resuelto con imagen estática JPG)
-- Caché de imágenes depende del navegador (no control total)
+- Caché de imágenes en web depende del navegador (no control total)
 - Performance puede degradarse con muchos elementos visibles (100+ Pokémon)
 - Scroll infinito puede acumular muchos widgets en memoria
 
@@ -351,7 +364,9 @@ _onScroll() {
 ```
 feat: implementar scroll infinito y configurar iconos de la app
 fix: corregir ProviderNotFoundError en scroll infinito
-chore: eliminar .cursorrules del repositorio
+fix: detalle de Pokémon desde caché offline e inicialización de CacheService
+refactor: eliminar prints y redundancia; banner error se oculta al recuperar conexión
+chore: CachedPokemonImage e ImageCacheManager para web/mobile
 ```
 
 **Beneficios**:
@@ -370,10 +385,9 @@ chore: eliminar .cursorrules del repositorio
    - Tests widget para componentes críticos
    - Aseguraría: Confianza en refactorizaciones y nuevas features
 
-2. **Optimización de imágenes** (Media prioridad)
-   - Implementación: Usar `cached_network_image` o similar
-   - Pre-carga de imágenes de siguiente página
-   - Compresión de imágenes para web
+2. **Optimización de imágenes** (Media prioridad, parcialmente hecho)
+   - Hecho: `CachedPokemonImage` y `ImageCacheManager` para web/mobile; caché de detalle offline
+   - Pendiente: Pre-carga de imágenes de siguiente página, compresión para web
    - Aseguraría: Mejor performance y menos consumo de datos
 
 3. **Búsqueda y filtros** (Media prioridad)

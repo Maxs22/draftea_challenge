@@ -19,7 +19,6 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Esperar 3 segundos antes de navegar a la pantalla principal
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         widget.onAnimationComplete();
@@ -34,11 +33,9 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Fondo negro primero
           Container(
             color: AppColors.backgroundDark,
           ),
-          // Imagen de fondo del splash con ajuste
           Center(
             child: Image.asset(
               'assets/imagen_splash.jpg',
@@ -52,7 +49,6 @@ class _SplashScreenState extends State<SplashScreen> {
               },
             ),
           ),
-          // Contenido posicionado más abajo
           Positioned(
             bottom: 120,
             left: 0,
@@ -60,7 +56,6 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Logo DRAFTEA
                 const DrafteaLogo(height: 50),
               ],
             ),

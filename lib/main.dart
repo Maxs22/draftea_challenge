@@ -10,21 +10,15 @@ import 'modulo/pokemon/presentation/views/pokedex_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Inicializar Hive para caché local
+
   await Hive.initFlutter();
-  
-  // Inicializar servicio de caché
   final cacheService = CacheService();
   await cacheService.init();
-  
-  // Limpiar caché expirado al iniciar
   await cacheService.clearExpiredCache();
-  
-  // Configurar según la plataforma
+
   WebConfig.configure();
   MobileConfig.configure();
-  
+
   runApp(const MyApp());
 }
 

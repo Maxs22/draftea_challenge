@@ -25,10 +25,10 @@ class ConnectivityService {
   }
 
   bool _isConnected(List<ConnectivityResult> results) {
-    // Si hay alguna conexión (wifi, mobile, ethernet), consideramos online
-    return results.any((result) =>
+    final hasConnection = results.any((result) =>
         result != ConnectivityResult.none &&
         result != ConnectivityResult.bluetooth);
+    return hasConnection;
   }
 
   void dispose() {

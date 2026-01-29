@@ -4,6 +4,7 @@ import '../../../../../../core/constants/app_colors.dart';
 import '../../../../../../core/constants/app_constants.dart';
 import '../../../../../../core/services/cache_service.dart';
 import '../../../../../../core/services/connectivity_service.dart';
+import '../../../../../../core/widgets/cached_pokemon_image.dart';
 import '../../../../data/models/pokemon_model.dart';
 import '../../../../data/repositories/pokemon_repository_impl.dart';
 import '../cubit/pokemon_detail_cubit.dart';
@@ -30,7 +31,6 @@ class PokemonDetailView extends StatelessWidget {
         
         return BlocProvider(
           create: (context) {
-            // Usar la instancia singleton de CacheService (ya inicializada en main.dart)
             final cacheService = CacheService();
             final connectivityService = ConnectivityService();
             final repository = PokemonRepositoryImpl(
@@ -63,7 +63,6 @@ class PokemonDetailView extends StatelessWidget {
     return Scaffold(
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(
-            // Altura más grande en web
             isWeb ? kToolbarHeight * 1.3 : kToolbarHeight,
           ),
           child: Container(
@@ -117,8 +116,7 @@ class PokemonDetailView extends StatelessWidget {
                 ),
               ),
             );
-            
-            // En web, centrar el contenido con márgenes laterales
+
             if (isWeb) {
               return Center(
                 child: ConstrainedBox(
@@ -141,38 +139,31 @@ class PokemonDetailView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Imagen del Pokémon con Hero para transición suave
           Container(
             height: 300,
             color: AppColors.backgroundDark,
             child: Center(
               child: Hero(
                 tag: 'pokemon_image_${pokemon.id}',
-                child: Image.network(
-                  pokemon.imageUrl,
+                child: CachedPokemonImage(
+                  imageUrl: pokemon.imageUrl,
+                  thumbnailUrl: pokemon.thumbnailUrl,
                   fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Icon(
-                      Icons.image_not_supported,
-                      size: 100,
-                      color: AppColors.textSecondary,
-                    );
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return const CircularProgressIndicator();
-                  },
+                  placeholder: const CircularProgressIndicator(),
+                  errorWidget: const Icon(
+                    Icons.image_not_supported,
+                    size: 100,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
             ),
           ),
-          // Información del Pokémon
           Padding(
             padding: const EdgeInsets.all(AppConstants.defaultPadding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Nombre e ID
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -195,7 +186,6 @@ class PokemonDetailView extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
-                // Tipos
                 if (pokemon.types != null && pokemon.types!.isNotEmpty) ...[
                   Text(
                     'Tipos',
@@ -259,7 +249,6 @@ class PokemonDetailView extends StatelessWidget {
                     Icons.star,
                   ),
                 ],
-                // Habilidades
                 if (pokemon.abilities != null && pokemon.abilities!.isNotEmpty) ...[
                   const SizedBox(height: 24),
                   Text(
